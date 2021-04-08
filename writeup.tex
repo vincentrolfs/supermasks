@@ -1,0 +1,331 @@
+\documentclass[12pt,final,twoside]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some credits:
+% The template initially was created by Prof. Dr. Holger Karl/Uni Paderborn '2006
+% and was expanded and updated by Dipl.-Inform. Stefan Heinrich/Uni Paderborn/Uni Hamburg since 2008.
+% Suggestions for changes are always welcome.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Meta information:
+\newcommand{\trtitle}{Achieving results with untrained neural networks using Supermasks}
+\newcommand{\trtype}{Independent Study Proposal}
+\newcommand{\trcourseofstudies}{Intelligent Adaptive Systems} %{Bioinformatik} 
+\newcommand{\trauthor}{Vincent Rolfs}
+\newcommand{\trauthortitle}{} %{Dipl.-Inform.\ }
+\newcommand{\tremail}{vincent.rolfs@studium.uni-hamburg.de}
+\newcommand{\trmatrikelnummer}{6789106}
+%\newcommand{\trstrasse}{Streetname 42}
+%\newcommand{\trort}{22527 Hamburg}
+\newcommand{\trgutachterA}{\href{mailto:wermter@informatik.uni-hamburg.de}{Prof. Dr. S. Wermter}}
+\newcommand{\trgutachterB}{\href{mailto:matthias.kerzel@informatik.uni-hamburg.de}{Dr. M. Kerzel}}
+%\newcommand{\trbetreuung}{\href{mailto:tbd@informatik.uni-hamburg.de}{Dipl.-Inform. To Be Defined}}
+\newcommand{\trfach}{Knowledge Technology, WTM}
+\newcommand{\trdate}{09.11.2020}
+\newcommand{\trkeywords}{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Languages:
+
+% If the thesis is written in English:
+\usepackage[english]{babel}                         
+\selectlanguage{english}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bind packages:
+
+\usepackage[backend=biber,bibencoding=utf8]{biblatex}
+\addbibresource{bibliography.bib} 
+
+\usepackage{amsfonts}                   % AMS Math Packet (Fonts)
+\usepackage{amsmath}                    % AMS Math Packet
+\usepackage{amssymb}                    % Additional mathematical symbols
+\usepackage{amsthm}
+\usepackage{color}                      % Enables defining of colours via \definecolor
+\definecolor{uhhRed}{RGB}{226,0,26}     % Official Uni Hamburg Red
+\definecolor{uhhGrey}{RGB}{136,136,136} % Official Uni Hamburg Grey
+\definecolor{uhhLightGrey}{RGB}{220, 220, 220}
+\usepackage{fancyhdr}                   % Packet for nicer headers
+\usepackage[body={5.8in,9in}]{geometry} % Type area (size, margins...)
+
+%\geometry{a4paper,outer=3.35cm}        % !!!Release version (Normal margins)
+%\geometry{a4paper,outer=2.5cm}         % !!!Print version (Additional margin on the left for the binding)
+%\geometry{a4paper}                     % !!!Proofread version (Additional margin on the right for corrections)
+\geometry{a4paper,outer=3.15cm}         % !!!Draft version (Same margins on left and right)
+%\geometry{paperheight=10.0in,paperwidth=6.4in,top=0.51in,left=0.3in}  % !!!Developer version (Minimal margins)
+
+\usepackage{graphicx}                   % Inclusion of graphics
+
+\usepackage{enumerate}
+%\usepackage{enumitem}[labelsep=8pt ,labelindent=3cm ,itemindent=3cm ,leftmargin=3cm ,listparindent=3cm]
+%
+%\newlist{phases}{enumerate}{1}
+%\setlist[phases]{label=Phase \arabic*:}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PDF Information und Definitions:
+\author{\trauthor}
+
+\ifx\pdftexversion\undefined
+\usepackage{hyperref}
+\else
+\usepackage[colorlinks=false,           % link is colores (true) or has colored frame (false)
+            linkcolor=uhhRed,           % case colorlinks=true: define color.
+            urlcolor=uhhRed,
+            citecolor=uhhRed,
+            bookmarks,                  % Place bookmarks erstellen
+            bookmarksopen=true,         % Bookmarks will be shown at start (true/false)
+            pdfpagemode=UseOutlines,    
+            bookmarksopenlevel=1,       % Define the depth of shown links
+            bookmarksnumbered,          % Numbers of chapers in Bookmarks
+            pdftitle={\trtitle},
+            pdfsubject={\trtype},
+            pdfkeywords={\trkeywords},
+            pdfauthor={\trauthor},
+            plainpages=false
+            ]{hyperref}
+\fi
+
+\ifx\pdftexversion\undefined
+\else
+\pdfoutput=1                            % Disable PDF-Output
+\pdfimageresolution=1200
+\pdfcompresslevel=2                     % 0 = no compression, 9 = strongest compression
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Configurationen:
+
+\hyphenation{whe-ther}                  % Manually use: "\-" in a word: Staats\-ver\-trag
+
+\DeclareGraphicsExtensions{.pdf,.svg,.jpg,.png,.eps} % first try pdf, then eps, png and jpg
+\graphicspath{{./src/}}                 % Path to a folder where all pictures are located
+\pagestyle{fancy}                       % Use nicer header and footer
+
+% Redefine the environments for floating objects:
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.9}        %Standard: 0.7
+\renewcommand{\bottomfraction}{0.5}     %Standard: 0.3
+\renewcommand{\textfraction}{0.1}       %Standard: 0.2
+\renewcommand{\floatpagefraction}{0.8}  %Standard: 0.5
+
+% Tables with a nicer padding:
+\renewcommand{\arraystretch}{1.2}
+
+% Chapter and Sections will not be written in capitals
+%\renewcommand{\chaptermark}[1]{\markboth{\chaptername \ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Additional 'theorem' and 'definition' blocks:
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{axiom}{Axiom}[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+%Additional types of axioms:
+\newtheorem{lemma}[axiom]{Lemma}
+\newtheorem{observation}[axiom]{Observation}
+
+%Additional types of definitions:
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+
+% Custom theorem name
+% https://tex.stackexchange.com/questions/12913/customizing-theorem-name
+\newtheoremstyle{named}{}{}{\itshape}{}{\bfseries}{.}{.5em}{\thmnote{#3}}
+\theoremstyle{named}
+\newtheorem*{namedtheorem}{Theorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Provides TODOs within the margin:
+\newcommand{\TODO}[1]{\marginpar{\emph{\small{{\bf TODO: } #1}}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abbreviations and mathematical symbols
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document:
+
+\begin{document}
+
+\pagenumbering{Roman}                   % Roman pagenumbering for lists and meta pages
+\renewcommand{\headheight}{14.5pt}      % Size of headings
+
+\thispagestyle{empty}
+\fancyhead[LO,RE]{}                     % Define the header style for the meta pages
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cover sheet
+
+\begin{titlepage}
+%---Possibility 1:
+    \begin{flushleft}
+        \includegraphics[width=85mm]{uhhLogoL.pdf}\\
+    \end{flushleft}
+%---Possibility 2:
+%\includegraphics*[width=0.09\textwidth]{uhhIconR_}
+%\parbox[c]{10cm}{
+%    \begin{center}
+%    Universit\"at Hamburg --- MIN-Fakult\"at\\
+%    \trfachgruppe
+%    \end{center}
+%    }\hfill
+%\includegraphics*[width=0.09\textwidth]{infIcon_}
+%\vspace{0.2cm}
+%---
+    \rule{\textwidth}{0.4pt}
+        \newline
+        \vspace{2.0cm}
+        \begin{center}
+          \LARGE \textbf{\trtitle}
+        \end{center}
+    \vspace{2.0cm}
+    \begin{center}
+      \textbf{\trtype}\\
+      %am Fachgebiet \trfach\\
+      im Arbeitsbereich \trfach\\
+      \trgutachterA\medskip\\
+      Department Informatik\\
+      MIN-Fakult\"at\\
+      Universit\"at Hamburg \\[0.5cm]
+      vorgelegt von \\
+      \textbf{\trauthortitle\href{mailto:\tremail}{\trauthor}}\\
+      am\\
+      \trdate
+    \end{center}
+    \vspace{1cm}
+    \begin{center}
+    \begin{tabular}{ll}
+    Gutachter: & \trgutachterA \\
+                   & \trgutachterB \\
+    %Betreuung: & \trbetreuung \\    	% Adviser are not allowed to demand getting credited, but are happy getting credited by the students initiative
+    \end{tabular}
+    \end{center}
+    \vfill
+    \begin{tabular}{l}
+    \trauthor \\
+    Matrikelnummer:  \trmatrikelnummer \\
+    %\trstrasse \\
+    %\trort
+    \end{tabular}
+    \newline
+    \rule{\textwidth}{0.4pt}
+    \newpage 
+\end{titlepage}
+
+%backsite of cover sheet is empty!
+%\thispagestyle{empty}
+%\hspace{1cm}
+%\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Lists:
+%\setcounter{tocdepth}{1}               % depth of the table of contents (for BSc and MSc Thesis 1 is recommented)
+\fancyhead[LE,RO]{\it Contents}
+\tableofcontents
+\newpage
+
+\fancyhead[LE]{\it \rightmark}           % Define the header style for the text pages
+\fancyhead[RO]{\it \rightmark}          % Define the header style for the text pages
+\fancyhead[LO,RE]{}                     % Define the header style for the text pages
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The content will be included here:
+\pagenumbering{arabic}
+
+\section{Introduction}
+Interest in decreasing the size of neural networks that are used to solve certain problems has existed since at least the year 1990 \cite{braindamage}. Different methods have been proposed that can be used to achieve a decrease in network size of up to 90\% while retaining performance \cite{braindamage} \cite{learning-weights-connections} \cite{brainsurgeon} \cite{pruning-filters}.
+
+This has multiple advantages, which can be classified according to the type of pruning that is applied. If the network is pruned after training while otherwise keeping the trained weights constant, this may result in reduced storage size, less energy consumption and faster computation during the application phase \cite{lottery}. If it is possible to retrain the smaller network from scratch, this may result in less overfitting because the number of parameters has decreased  \cite{learning-weights-connections}. And if a smaller but still effective network topology can be chosen \textit{before training}, this can reduce the training time, because less parameters have to be optimized.
+
+However, conventional pruning techniques have the problem that, when retraining from scratch on the smaller topology, the performance gets considerably worse \cite{lottery}. These pruning techniques are only amenable for pruning the weights computed by an inital training run, and do not work well if the aim is to retrain once again on the smaller topology. Therefore, they cannot be used to choose a good topology before the training starts, because the correct parameters for the smaller network can only be discovered by training the larger network.
+
+In contrast to this negative state of affairs, in their paper "The Lottery Ticket Hypothesis: Finding Sparse, Trainable Neural Networks" \cite{lottery}, the authors present a hypothesis that essentially claims that pre-training pruning nonetheless has a lot of potential:
+
+\begin{namedtheorem}[The Lottery Ticket Hypothesis \cite{lottery}]
+A randomly-initialized, dense neural network contains a subnetwork that is initialized such that -- when trained in isolation -- it can match the test accuracy of the original network after training for at most the same number of iterations.
+\end{namedtheorem}
+
+The authors further show that the subnetwork mentioned in the hypothesis can be uncovered by training the dense network and then setting a percentage $p\%$ of the parameters with smallest magnitude to zero (and freezing them, so that they are not trained anymore). If the remaining parameters are then set to their inital values (the random values they had before the training started), and one retrains the smaller network starting with these initial values, then the training time will usually be less and the test performance better compared to the original, dense, trained network \cite{lottery}.
+
+It is imperative here that the non-frozen parameters are reset to their \textit{initial}, random values, not newly chosen random values. If the latter is chosen, the performance is much worse and the "Lottery Ticket" has not been uncovered \cite{lottery}. In other words, we should not only search for efficient network topologies, but also for good initial values.
+
+This curious fact has been further investigated by Zhou et al.\ \cite{supermask}. They realized that the subnetworks obtained through pruning show a performance that is significantly higher than chance \textit{before they are trained}. More specifically, a randomly-initialized, dense network is first trained. The trained parameters are then ranked by a value given by
+$$
+\operatorname{sign}\left(w_{\text initial}\right) \cdot w_{\text trained}
+$$
+so that parameters with large magnitude that retained their sign are ranked high. A percentage $p\%$ of the lowest-ranking parameters is set to zero and frozen, the rest is reset to a constant with the same sign as their initial value. The resulting network is \textbf{not} trained again, rather it is being evaluated directly. Note that the values of the parameters at that point come directly from the initial random initialization, the only training information comes from deciding which of these random values to set to zero. Nonetheless, this technique achieves a remarkable $86\%$ accuracy on MNIST, and $41\%$ on CIFAR-10. The authors call the corresponding 0-1-masks "Supermasks".
+
+In this paper, we describe a method for using the Supermask approach as a tool for choosing the pruning treshold during lottery ticket pruning. As part of this, we reproduce results from both \cite{lottery} and \cite{supermask}, showing that supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks. Furthermore, we compare our method to  a simple hyperoptimization approach for decreasing the network size, and show that our method can yield a significantly smaller size while retaining the same accuracy and training speed.
+
+\section{Approach}
+
+% todo: explain what we want to do and why
+Our basic setup follows closely the one in \cite{supermask}. 
+
+\subsection{Dataset}
+
+All experiments are done with the well established MNIST dataset \cite{mnist}. It contains a collection of grayscale images of size $28 \times 28$, which each correspond to exactly one of ten possible digits $0$ to $9$. The dataset has already been split into a training and a testing part; it contains $60.000$ training examples and $10.000$ testing examples. We are using the training examples for training the network, and the testing examples for validation of the network performance during training.
+
+\subsection{Baseline neural network}
+
+In order to apply the pruning techniques and supermasks, we need a baseline neural network. As in \cite{supermask}, we chose a fully connected neural network with three layers. The input size is $28 \times 28 = 784$, the first layer has size $200$, the second has size $30$ and the output layer has size $10$, since there are ten classes in the dataset. Compared to \cite{supermask} we chose a smaller value for the first and second layer size: In that paper, the sizes are $300$ and $100$ respectively. This was done because early experimentation with simple hyperoptimization showed that we could achieve the same performance with our smaller architecture during training. Since we are testing pruning capabilities, it is good to start with a network size that cannot be reduced trivially.
+
+% todo: activation function
+
+\subsection{Training and early stopping}
+
+Since we need a meaningful trained baseline that does not overfit, we use the same early stopping criterion as in \cite{supermask}. After saving the initial, random parameters, the neural network is first trained for $20.000$ iterations, using the Adam optimizer \cite{adam} with learning rate $0.0012$ (as in \cite{supermask}) and the PyTorch cross entropy loss \cite{pytorch}. Each iteration corresponds to the processing of one batch of training data; one batch contains $60$ training examples. This initial training certainly leads to overfitting, which can be seen by plotting the validation loss, which is evaluated every $100$ iterations.
+
+% todo: Plot of validation loss with 20.000 iterations
+
+Because of this, we then record at which iteration the minimal validation loss was achieved. For all random seeds, this always happens around iteration $5000$. We then retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network.
+
+The whole training procedure is performed ten times using different random seeds. Before training, the validation accuracy is $0.101 \pm 0.016$. After training, the validation accuracy is $0.977 \pm 0.001$.
+
+\subsection{Training and early stopping}
+
+The next step of our methodology is the application of the supermasks. To that end, we apply the following procedure taken from \cite{supermask}. First, we reset the baseline network to its initial parameters, which were randomly initialized, but saved before the training started. Next, we choose a treshold $t$ and iterate through the parameters $w_1, \ldots, w_n$ of the network. We set a new value for each parameter according to the formula
+ 
+$$
+w_i^{\text{new}} := \begin{cases}
+w_i^{\text{initial}} & \text{if } \operatorname{sign}\left(w_i^{\text{initial}} \right) \cdot w_i^{\text{trained}} \geq t \\ 
+0 & \text{otherwise.} \\
+\end{cases}
+$$
+
+In effect, we keep parameters the same which had a large magnitude after training, and still had the same sign as the initial value. The other parameters are set to zero. The resulting neural network is identical to the initial, randomly initialized network, with some parameters set to zero. Effectively, a zero-one mask was applied to the initial, untrained network -- the so-called Supermask.
+
+We then evaluate the accuracy of this masked network on the validation set. Of course, the performance depends on the threshold: For very large thresholds, all parameters are set to zero, so the accuracy will be close to $0.1$. For very small (negative) thresholds, all parameters are kept at their initial value, which was randomly chosen at the beginning, so we still expect an accuracy close to $0.1$. For intermediate tresholds, something remarkable happens: The masked network achieves a validation accuracy that is significantly better than $0.1$, even though all the parameter values come from a random distribution, and the only training information lies in the decision which parameters to set to zero. The performance for different tresholds of the masked networks across all ten random seeds are shown in XXX.
+
+% todo: add figure
+
+\subsection{Lottery tickets}
+
+The next step is to apply the knowledge we have about the performance of the masked networks. We wish to find a "Lottery Ticket" -- this is essentially a masked network which has been trained, where the parameters that are zero are frozen during training. When trying to prune a network using lottery tickets, one is faced with the one question that always arises during pruning: How small should the resulting network be? Here, we use the validation results of the supermasks as a guideline: Out of all the masked networks resulting from different tresholds, we choose the masked network that has the highest validation accuracy before training. We then train this masked network for $5000$ iterations and observe the validation loss.
+
+\subsection{Hyperoptimization}
+
+In order to have a comparization for the quality of the pruning produced by the lottery ticket approach, we employ a simple hyperoptimization scheme to optimize the network size. Whereas the initial sizes for layers $1$ and $2$ were $200$ and $30$ respectively, for the hyperoptimization we allow all combinations of $50, 100, 150$ and $5, 15, 25$ respectively. For each of these size combinations, we take a randomly initialized network of that size, and train it for $5000$ ietrations, observing the validation loss.
+
+\section{Conclusion}
+
+%\fancyhead[LE]{\it \leftmark}
+%\chapter{}
+%\fancyhead[LE,RO]{\it Bibliography}       % A bibliography never have a letter or numbering!
+    \addcontentsline{toc}{section}{Bibliography}% Add to the TOC
+    \printbibliography
+%\cleardoublepage
+
+\end{document}
+
+
+% Fragen
+% Wie viele Seiten?
+% Wirklich nötig, erst approach, dann results? SChwierig zu erklären und komischer Fluss, den die Methodik baut ja auf den intermediate results auf
+% Vielleicht mehrere results sections? 1. Reproduction of supermask performance, 1.1. Approach, 1.2. Results, then 2. Methodology for finding Lottery Tickets in practice
+
