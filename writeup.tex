@@ -273,8 +273,20 @@ In this paper, we provide the following contributions to the new theory of Lotte
 \section{Approach}
 In this section we describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. We assume that we have a fully connected multilayer perceptron which has already been trained to satisfaction and should be pruned now. Importantly, we also assume that the weights with which the network had been initialized before training have been saved.
 
-\subsection{Step one: Evaluating supermasks}
-As the first step of the methodology, we want to find an optimal pruning threshold. For this, we use the theory of Supermasks \cite{supermask}, which essentially says that during the procedure for finding Lottery tickets outlined in \cite{lottery}, the candidates that are found achieve a performance that is already significantly better than random \textit{before they are trained}. It is therefore natural to simply use the candidate that has achieves the highest \textit{untrained} performance as the Lottery ticket, which will be trained to get a highly performant pruned network.
+\subsection{Step one: Finding the pruning treshold}
+As the first step of the methodology, we want to find an optimal pruning threshold. For this, we use the theory of Supermasks \cite{supermask}, which essentially says that during the procedure for finding Lottery tickets outlined in \cite{lottery}, the candidates that are found achieve a performance that is already significantly better than random \textit{before they are trained}. It is therefore natural to simply use the candidate that has achieves the highest \textit{untrained} performance as the Lottery ticket, which will be trained to get a highly performant pruned network. This is useful because the computation of the different candidates as well as their evaluation is not computationally expensive, since no training has to take place.
+
+We now give more details about this step. Following the Lottery ticket approach, we want to take our initial network parameters, set some of them to zero and freeze them there, and train the resulting network, which therefore effectively has a smaller size. In the original Lottery ticket paper \cite{lottery}, this is done by setting all parameters to zero which had a small magnitude after training. How many parameters are set to zero depends on the specific threshold -- a higher treshold corresponds to more aggressive pruning. For example, suppose the initial parameters are $0.1, 0.2, 0.3$ and the parameters after training are $-0.2, 0.05, 0.3$. If we prune with a treshold of $t = 0.1$, we would get the parameters $0.1, 0, 0.3$. Starting with these values, we would then train the network, but the second value would be frozen at $0$.
+
+The Supermask approach \cite{supermask} provides two further insights. First, the authors show that instead of setting those parameters to zero whose magnitude after training $|w_{\text trained}|$ is minimal, one gets better results by setting those parameters to zero for which the value 
+$$
+\operatorname{sign}\left(w_{\text initial}\right) \cdot w_{\text trained}
+$$
+is minimal. In other words, we keep those values which both have a large magnitude after training and retain their sign, and set the other parameters to zero. Following the example above, if the initial parameters are $0.1, 0.2, 0.3$ and the parameters after training are $-0.2, 0.05, 0.3$, then pruning with a treshold $t=0.1$ yields $0, 0, 0.3$ -- in this case, the first value is pruned as well, because it changed signs.
+
+The second, and most crucial, insight in \cite{supermask} is that even though the parameters we get through this method are just a version of the initial, random parameters with some set to zero, they nonetheless show a suprising performance when evaluated. This is where the term Supermask comes from: We take the initial, random parameters and multiply them with a mask of zeros and ones, and suddenly we get suprisingly great performance: In \cite{supermask}, the authors report an accuracy of $86\%$ on MNIST.
+
+This leads us to a straightforward way of choosing a treshold: We simply compute the masked networks for different tresholds, and then (without training!) check their performance on the validation set. We then choose the treshold the yielded the highest performance. More to the point, we choose the masked network corresponding to that treshold, and train it to yield our pruned network.
 
 \section{Evaluation}
 
