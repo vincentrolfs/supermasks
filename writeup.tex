@@ -274,7 +274,7 @@ In this paper, we provide the following contributions to the new theory of Lotte
 In this section we describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. We assume that we have a fully connected multilayer perceptron which has already been trained to satisfaction and should be pruned now. Importantly, we also assume that the weights with which the network had been initialized before training have been saved.
 
 \subsection{Step one: Evaluating supermasks}
-As the first step of the methodology, we want to find an optimal pruning threshold.
+As the first step of the methodology, we want to find an optimal pruning threshold. For this, we use the theory of Supermasks \cite{supermask}, which essentially says that during the procedure for finding Lottery tickets outlined in \cite{lottery}, the candidates that are found achieve a performance that is already significantly better than random \textit{before they are trained}. It is therefore natural to simply use the candidate that has achieves the highest \textit{untrained} performance as the Lottery ticket, which will be trained to get a highly performant pruned network.
 
 \section{Evaluation}
 
