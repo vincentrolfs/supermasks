@@ -55,7 +55,7 @@
 \usepackage{graphicx}                   % Inclusion of graphics
 
 \usepackage{enumerate}
-%\usepackage{enumitem}[labelsep=8pt ,labelindent=3cm ,itemindent=3cm ,leftmargin=3cm ,listparindent=3cm]
+\usepackage{enumitem}[labelsep=8pt ,labelindent=3cm ,itemindent=3cm ,leftmargin=3cm ,listparindent=3cm]
 %
 %\newlist{phases}{enumerate}{1}
 %\setlist[phases]{label=Phase \arabic*:}
@@ -254,15 +254,29 @@ The authors further show that the subnetwork mentioned in the hypothesis can be 
 
 It is imperative here that the non-frozen parameters are reset to their \textit{initial}, random values, not newly chosen random values. If the latter is chosen, the performance is much worse and the "Lottery Ticket" has not been uncovered \cite{lottery}. In other words, we should not only search for efficient network topologies, but also for good initial values.
 
-This curious fact has been further investigated by Zhou et al.\ \cite{supermask}. They realized that the subnetworks obtained through pruning show a performance that is significantly higher than chance \textit{before they are trained}. More specifically, a randomly-initialized, dense network is first trained. The trained parameters are then ranked by a value given by
+This curious fact has been further investigated by Zhou et al.\ \cite{supermask}. They realized that the subnetworks obtained through pruning show a performance that is already significantly higher than chance \textit{before they are trained}. More specifically, a randomly-initialized, dense network is first trained. The trained parameters are then ranked by a value given by
 $$
 \operatorname{sign}\left(w_{\text initial}\right) \cdot w_{\text trained}
 $$
 so that parameters with large magnitude that retained their sign are ranked high. A percentage $p\%$ of the lowest-ranking parameters is set to zero and frozen, the rest is reset to a constant with the same sign as their initial value. The resulting network is \textbf{not} trained again, rather it is being evaluated directly. Note that the values of the parameters at that point come directly from the initial random initialization, the only training information comes from deciding which of these random values to set to zero. Nonetheless, this technique achieves a remarkable $86\%$ accuracy on MNIST, and $41\%$ on CIFAR-10. The authors call the corresponding 0-1-masks "Supermasks".
 
-In this paper, we describe a method for using the Supermask approach as a tool for choosing the pruning treshold during lottery ticket pruning. As part of this, we reproduce results from both \cite{lottery} and \cite{supermask}, showing that supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks. Furthermore, we compare our method to  a simple hyperoptimization approach for decreasing the network size, and show that our method can yield a significantly smaller size while retaining the same accuracy and training speed.
+In this paper, we provide the following contributions to the new theory of Lottery Ticket pruning:
+\setlist{nolistsep}
+\begin{itemize}[noitemsep]
+\item We describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. The methodology crucially uses the Supermask idea for finding the pruning treshold.
+\item We show that the methodology applied on MNIST outperforms hyperoptimization of the network layer sizes: Our method can yield a significantly smaller size while retaining the same accuracy and training speed.
+\item As part of this, we reproduce the main results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask} on MNIST: Supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks.
+\end{itemize}
+
+% todo: advantage of lottery ticket pruning to other methods, see lottery ticket paper: "Contributions"
 
 \section{Approach}
+In this section we describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. We assume that we have a fully connected multilayer perceptron which has already been trained to satisfaction and should be pruned now. Importantly, we also assume that the weights with which the network had been initialized before training have been saved.
+
+\subsection{Step one: Evaluating supermasks}
+As the first step of the methodology, we want to find an optimal pruning threshold.
+
+\section{Evaluation}
 
 % todo: explain what we want to do and why
 Our basic setup follows closely the one in \cite{supermask}. 
