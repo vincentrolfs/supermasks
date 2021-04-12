@@ -308,9 +308,7 @@ $$
 \end{enumerate}
 
 \section{Evaluation}
-
-% todo: explain what we want to do and why
-Our basic setup follows closely the one in \cite{supermask}. 
+In order to evaluate the outlined methodology, we will apply it to a standard dataset ten times using ten different random seeds. For each of these runs, we also perform a standard hyperoptimization approach for layer size reduction as a comparison. As part of this evaluation, we reproduce the main results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask}.
 
 \subsection{Dataset}
 
@@ -318,7 +316,7 @@ All experiments are done with the well established MNIST dataset \cite{mnist}. I
 
 \subsection{Baseline neural network}
 
-In order to apply the pruning techniques and supermasks, we need a baseline neural network. As in \cite{supermask}, we chose a fully connected neural network with three layers. The input size is $28 \times 28 = 784$, the first layer has size $200$, the second has size $30$ and the output layer has size $10$, since there are ten classes in the dataset. Compared to \cite{supermask} we chose a smaller value for the first and second layer size: In that paper, the sizes are $300$ and $100$ respectively. This was done because early experimentation with simple hyperoptimization showed that we could achieve the same performance with our smaller architecture during training. Since we are testing pruning capabilities, it is good to start with a network size that cannot be reduced trivially.
+In order to apply the pruning techniques and supermasks, we need a baseline neural network. As in \cite{supermask}, we chose a fully connected neural network with three layers. The input size is $28 \times 28 = 784$, the first layer has size $200$, the second has size $30$ and the output layer has size $10$, since there are ten classes in the dataset. Compared to \cite{supermask} we chose smaller values for the first and second layer size: In that paper, the sizes are $300$ and $100$ respectively. This was done because early experimentation with simple hyperoptimization showed that we could achieve the same performance with our smaller architecture during training. Since we are testing pruning capabilities, it is good to start with a network size that cannot be reduced trivially.
 
 % todo: activation function
 
@@ -328,9 +326,9 @@ Since we need a meaningful trained baseline that does not overfit, we use the sa
 
 % todo: Plot of validation loss with 20.000 iterations
 
-Because of this, we then record at which iteration the minimal validation loss was achieved. For all random seeds, this always happens around iteration $5000$. We then retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network.
+Because of this, we then record at which iteration the minimal validation loss was achieved. For all random seeds, this always happened around iteration $5000$. We then retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network.
 
-The whole training procedure is performed ten times using different random seeds. Before training, the validation accuracy is $0.101 \pm 0.016$. After training, the validation accuracy is $0.977 \pm 0.001$.
+Across random seeds,  the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training.
 
 \subsection{Training and early stopping}
 
