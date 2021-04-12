@@ -5,3 +5,5 @@
 *.xml
 *.gz
 *.toc
+*.bbl
+*.bbg
