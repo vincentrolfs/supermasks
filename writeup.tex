@@ -329,6 +329,7 @@ Since we need a meaningful trained baseline that does not overfit, we use the sa
 
 \begin{figure}[h]
   \centering
+  \textbf{Validation accuracy during initial training without early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/initial_trainings.pdf}
   \caption{The validation loss during the initial training run, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. Overfitting is clearly apparent: After about iteration $5000$, the validation starts increasing again.}
   \label{fig:initial-training}
@@ -337,30 +338,58 @@ Since we need a meaningful trained baseline that does not overfit, we use the sa
 Because of this, we record at which iteration the minimal validation loss was achieved, and retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. For all random seeds, the minimal validation loss is always achieved around iteration $5000$. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network. The validation loss during the second training run is visualized in Figure \ref{fig:refined-training}.
 
 \begin{figure}[h]
+ 
   \centering
+  \textbf{Validation accuracy during refined training with early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/refined_trainings.pdf}
   \caption{The validation loss during the second training run with early stopping, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. For each seed, the training was stopped at the iteration that achieved the minimal validation loss during the initial training run. We can see that this approach results in a non-overfit, small validation loss when the training finishes.}
   \label{fig:refined-training}
 \end{figure}
 
-Across random seeds,  the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training.
+Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training.
 
-\subsection{Training and early stopping}
+\subsection{Supermasks}
 
-The next step of our methodology is the application of the supermasks. To that end, we apply the following procedure taken from \cite{supermask}. First, we reset the baseline network to its initial parameters, which were randomly initialized, but saved before the training started. Next, we choose a treshold $t$ and iterate through the parameters $w_1, \ldots, w_n$ of the network. We set a new value for each parameter according to the formula
- 
+We are now at step three of our methodology: The computation of the masked networks. To do this, we consider tresholds $t$ from the set $\left\{0, 0.01, 0.02, \ldots, 0.2\right\}$. As described above, we then take the initial parameters of the network, and set some of them to zero, using the formula
 $$
 w_i^{\text{new}} := \begin{cases}
-w_i^{\text{initial}} & \text{if } \operatorname{sign}\left(w_i^{\text{initial}} \right) \cdot w_i^{\text{trained}} \geq t \\ 
+w_i^{\text{initial}} & \text{if } \operatorname{sign}\left(w_i^{\text{initial}} \right) \cdot w_i^{\text{trained}} \geq t, \\ 
 0 & \text{otherwise.} \\
 \end{cases}
 $$
 
-In effect, we keep parameters the same which had a large magnitude after training, and still had the same sign as the initial value. The other parameters are set to zero. The resulting neural network is identical to the initial, randomly initialized network, with some parameters set to zero. Effectively, a zero-one mask was applied to the initial, untrained network -- the so-called Supermask.
+The exact size reduction achieved by choosing a particular threshold depends on the initialization, but the variance is low accross seeds: $t=0$ results in a relative size of $64.6\% \pm 0.4$, while $t=0.2$ results in $4.1\% \pm 0.6$. The size for different tresholds is visualized in Figure \ref{fig:pruned-sizes}.
 
-We then evaluate the accuracy of this masked network on the validation set. Of course, the performance depends on the threshold: For very large thresholds, all parameters are set to zero, so the accuracy will be close to $0.1$. For very small (negative) thresholds, all parameters are kept at their initial value, which was randomly chosen at the beginning, so we still expect an accuracy close to $0.1$. For intermediate tresholds, something remarkable happens: The masked network achieves a validation accuracy that is significantly better than $0.1$, even though all the parameter values come from a random distribution, and the only training information lies in the decision which parameters to set to zero. The performance for different tresholds of the masked networks across all ten random seeds are shown in XXX.
+\begin{figure}[h]
+  \centering
+  \textbf{Sizes of masked networks}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/pruned_sizes.pdf}
+  \caption{The relative network sizes after pruning with different tresholds. The variance across seeds is too small to be visible. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. }
+  \label{fig:pruned-sizes}
+\end{figure}
 
-% todo: add figure
+With step four, we now choose the treshold which resulted in the highest validation accuracy, before any further training is done. Here, the variance is very high across seeds. The ideal treshold is found to be at $0.049 \pm 0.049$, resulting in a relative network size of $38.7\% \pm 17.9$. The resulting accuracy of these masked and otherwise untrained networks is $42.6\% \pm 15.2$, where the smallest value observed is $19.1\%$ and the largest is $70.0\%$. This astonishing fact marks our first reproduced result: As claimed in \cite{supermask}, the strategy of masking the initial, random values does indeed lead to a high accuracy, even though there is not explicit training of the masked networks involved. This is shown in \ref{fig:pruned-accuracies}, where the accuracies obtained by pruning with different tresholds are visualized across seeds.
+
+\begin{figure}[h]
+  \centering
+  \textbf{Validation accuracies of untrained masked networks}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/pruned_accuracies.pdf}
+  \caption{The validation accuracies obtained when evaluating the untrained, masked networks for different tresholds, aggregated across all ten seeds. The indicated intervals show the standard deviation. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. Even though the masked networks were never trained explicitly, they reach an accuracy that is significantly better than chance.}
+  \label{fig:pruned-accuracies}
+\end{figure}
+
+%The next step of our methodology is the application of the supermasks. To that end, we apply the following procedure taken from \cite{supermask}. First, we reset the baseline network to its initial parameters, which were randomly initialized, but saved before the training started. Next, we choose a treshold $t$ and iterate through the parameters $w_1, \ldots, w_n$ of the network. We set a new value for each parameter according to the formula
+% 
+%$$
+%w_i^{\text{new}} := \begin{cases}
+%w_i^{\text{initial}} & \text{if } \operatorname{sign}\left(w_i^{\text{initial}} \right) \cdot w_i^{\text{trained}} \geq t \\ 
+%0 & \text{otherwise.} \\
+%\end{cases}
+%$$
+%
+%In effect, we keep parameters the same which had a large magnitude after training, and still had the same sign as the initial value. The other parameters are set to zero. The resulting neural network is identical to the initial, randomly initialized network, with some parameters set to zero. Effectively, a zero-one mask was applied to the initial, untrained network -- the so-called Supermask.
+%
+%We then evaluate the accuracy of this masked network on the validation set. Of course, the performance depends on the threshold: For very large thresholds, all parameters are set to zero, so the accuracy will be close to $0.1$. For very small (negative) thresholds, all parameters are kept at their initial value, which was randomly chosen at the beginning, so we still expect an accuracy close to $0.1$. For intermediate tresholds, something remarkable happens: The masked network achieves a validation accuracy that is significantly better than $0.1$, even though all the parameter values come from a random distribution, and the only training information lies in the decision which parameters to set to zero. The performance for different tresholds of the masked networks across all ten random seeds are shown in XXX.
 
 \subsection{Lottery tickets}
 
@@ -371,6 +400,8 @@ The next step is to apply the knowledge we have about the performance of the mas
 In order to have a comparization for the quality of the pruning produced by the lottery ticket approach, we employ a simple hyperoptimization scheme to optimize the network size. Whereas the initial sizes for layers $1$ and $2$ were $200$ and $30$ respectively, for the hyperoptimization we allow all combinations of $50, 100, 150$ and $5, 15, 25$ respectively. For each of these size combinations, we take a randomly initialized network of that size, and train it for $5000$ ietrations, observing the validation loss.
 
 \section{Conclusion}
+
+% todo: reproduction, but effect observed is not as strong
 
 %\fancyhead[LE]{\it \leftmark}
 %\chapter{}
