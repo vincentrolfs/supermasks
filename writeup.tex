@@ -5,6 +5,9 @@
 % and was expanded and updated by Dipl.-Inform. Stefan Heinrich/Uni Paderborn/Uni Hamburg since 2008.
 % Suggestions for changes are always welcome.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\todowarn}{\color{yellow} TODO \color{red} TODO \color{blue} TODO}
+
 % Meta information:
 \newcommand{\trtitle}{Achieving results with untrained neural networks using Supermasks}
 \newcommand{\trtype}{Independent Study Proposal}
@@ -19,7 +22,7 @@
 \newcommand{\trgutachterB}{\href{mailto:matthias.kerzel@informatik.uni-hamburg.de}{Dr. M. Kerzel}}
 %\newcommand{\trbetreuung}{\href{mailto:tbd@informatik.uni-hamburg.de}{Dipl.-Inform. To Be Defined}}
 \newcommand{\trfach}{Knowledge Technology, WTM}
-\newcommand{\trdate}{09.11.2020}
+\newcommand{\trdate}{\todowarn}
 \newcommand{\trkeywords}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -312,7 +315,7 @@ In order to evaluate the outlined methodology, we will apply it to a standard da
 
 \subsection{Dataset}
 
-All experiments are done with the well established MNIST dataset \cite{mnist}. It contains a collection of grayscale images of size $28 \times 28$, which each correspond to exactly one of ten possible digits $0$ to $9$. The dataset has already been split into a training and a testing part; it contains $60.000$ training examples and $10.000$ testing examples. We are using the training examples for training the network, and the testing examples for validation of the network performance during training.
+All experiments are done with the well-established MNIST dataset \cite{mnist}. It contains a collection of grayscale images of size $28 \times 28$, which each correspond to exactly one of ten possible digits $0$ to $9$. The dataset has already been split into a training and a testing part; it contains $60.000$ training examples and $10.000$ testing examples. We are using the training examples for training the network, and the testing examples for validation of the network performance during training.
 
 \subsection{Baseline neural network}
 
@@ -322,11 +325,23 @@ In order to apply the pruning techniques and supermasks, we need a baseline neur
 
 \subsection{Training and early stopping}
 
-Since we need a meaningful trained baseline that does not overfit, we use the same early stopping criterion as in \cite{supermask}. After saving the initial, random parameters, the neural network is first trained for $20.000$ iterations, using the Adam optimizer \cite{adam} with learning rate $0.0012$ (as in \cite{supermask}) and the PyTorch cross entropy loss \cite{pytorch}. Each iteration corresponds to the processing of one batch of training data; one batch contains $60$ training examples. This initial training certainly leads to overfitting, which can be seen by plotting the validation loss, which is evaluated every $100$ iterations.
+Since we need a meaningful trained baseline that does not overfit, we use the same early stopping criterion as in \cite{supermask}. After saving the initial, random parameters, the neural network is first trained for $20.000$ iterations, using the Adam optimizer \cite{adam} with learning rate $0.0012$ (as in \cite{supermask}) and the PyTorch cross entropy loss \cite{pytorch}. Each iteration corresponds to the processing of one batch of training data; one batch contains $60$ training examples. This initial training certainly leads to overfitting, which can be seen by plotting the validation loss (Figure \ref{fig:initial-training}).
 
-% todo: Plot of validation loss with 20.000 iterations
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.75\textwidth]{plots/initial_trainings.pdf}
+  \caption{The validation loss during the initial training run, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. Overfitting is clearly apparent: After about iteration $5000$, the validation starts increasing again.}
+  \label{fig:initial-training}
+\end{figure}
 
-Because of this, we then record at which iteration the minimal validation loss was achieved. For all random seeds, this always happened around iteration $5000$. We then retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network.
+Because of this, we record at which iteration the minimal validation loss was achieved, and retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. For all random seeds, the minimal validation loss is always achieved around iteration $5000$. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network. The validation loss during the second training run is visualized in Figure \ref{fig:refined-training}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.75\textwidth]{plots/refined_trainings.pdf}
+  \caption{The validation loss during the second training run with early stopping, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. For each seed, the training was stopped at the iteration that achieved the minimal validation loss during the initial training run. We can see that this approach results in a non-overfit, small validation loss when the training finishes.}
+  \label{fig:refined-training}
+\end{figure}
 
 Across random seeds,  the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training.
 
