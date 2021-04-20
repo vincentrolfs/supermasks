@@ -392,7 +392,7 @@ To create the lottery ticket, we take the best-performing masked network from th
   \label{fig:lt-accuracy}
 \end{figure}
 
-At the same time, the Lottery Tickets network that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. 
+At the same time, the Lottery Tickets network that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. As described in the previous section, the optimal Supermasks, and therefore also the Lottery Tickets, have a relative network size of $38.7\% \pm 17.9$. Thus, our method produces networks that are comparable in size to the low-performing hyperoptimizations, while they tend to outperform even the high-performing hyperoptimizations.
 
 \begin{figure}[h]
   \centering
@@ -401,27 +401,6 @@ At the same time, the Lottery Tickets network that were found by our method are 
   \caption{}
   \label{fig:lt-size}
 \end{figure}
-
-%The next step of our methodology is the application of the supermasks. To that end, we apply the following procedure taken from \cite{supermask}. First, we reset the baseline network to its initial parameters, which were randomly initialized, but saved before the training started. Next, we choose a treshold $t$ and iterate through the parameters $w_1, \ldots, w_n$ of the network. We set a new value for each parameter according to the formula
-% 
-%$$
-%w_i^{\text{new}} := \begin{cases}
-%w_i^{\text{initial}} & \text{if } \operatorname{sign}\left(w_i^{\text{initial}} \right) \cdot w_i^{\text{trained}} \geq t \\ 
-%0 & \text{otherwise.} \\
-%\end{cases}
-%$$
-%
-%In effect, we keep parameters the same which had a large magnitude after training, and still had the same sign as the initial value. The other parameters are set to zero. The resulting neural network is identical to the initial, randomly initialized network, with some parameters set to zero. Effectively, a zero-one mask was applied to the initial, untrained network -- the so-called Supermask.
-%
-%We then evaluate the accuracy of this masked network on the validation set. Of course, the performance depends on the threshold: For very large thresholds, all parameters are set to zero, so the accuracy will be close to $0.1$. For very small (negative) thresholds, all parameters are kept at their initial value, which was randomly chosen at the beginning, so we still expect an accuracy close to $0.1$. For intermediate tresholds, something remarkable happens: The masked network achieves a validation accuracy that is significantly better than $0.1$, even though all the parameter values come from a random distribution, and the only training information lies in the decision which parameters to set to zero. The performance for different tresholds of the masked networks across all ten random seeds are shown in XXX.
-
-%\subsection{Lottery tickets}
-%
-%The next step is to apply the knowledge we have about the performance of the masked networks. We wish to find a "Lottery Ticket" -- this is essentially a masked network which has been trained, where the parameters that are zero are frozen during training. When trying to prune a network using lottery tickets, one is faced with the one question that always arises during pruning: How small should the resulting network be? Here, we use the validation results of the supermasks as a guideline: Out of all the masked networks resulting from different tresholds, we choose the masked network that has the highest validation accuracy before training. We then train this masked network for $5000$ iterations and observe the validation loss.
-%
-%\subsection{Hyperoptimization}
-%
-%In order to have a comparization for the quality of the pruning produced by the lottery ticket approach, we employ a simple hyperoptimization scheme to optimize the network size. Whereas the initial sizes for layers $1$ and $2$ were $200$ and $30$ respectively, for the hyperoptimization we allow all combinations of $50, 100, 150$ and $5, 15, 25$ respectively. For each of these size combinations, we take a randomly initialized network of that size, and train it for $5000$ iterations, observing the validation loss.
 
 \section{Conclusion}
 
