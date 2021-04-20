@@ -48,6 +48,10 @@
 \definecolor{uhhLightGrey}{RGB}{220, 220, 220}
 \usepackage{fancyhdr}                   % Packet for nicer headers
 \usepackage[body={5.8in,9in}]{geometry} % Type area (size, margins...)
+\usepackage{booktabs, makecell} % tables
+\renewcommand\theadfont{\bfseries}
+
+\usepackage{float}
 
 %\geometry{a4paper,outer=3.35cm}        % !!!Release version (Normal margins)
 %\geometry{a4paper,outer=2.5cm}         % !!!Print version (Additional margin on the left for the binding)
@@ -263,13 +267,7 @@ $$
 $$
 so that parameters with large magnitude that retained their sign are ranked high. A percentage $p\%$ of the lowest-ranking parameters is set to zero and frozen, the rest is reset to a constant with the same sign as their initial value. The resulting network is \textbf{not} trained again, rather it is being evaluated directly. Note that the values of the parameters at that point come directly from the initial random initialization, the only training information comes from deciding which of these random values to set to zero. Nonetheless, this technique achieves a remarkable $86\%$ accuracy on MNIST, and $41\%$ on CIFAR-10. The authors call the corresponding 0-1-masks "Supermasks".
 
-In this paper, we provide the following contributions to the new theory of Lottery Ticket pruning:
-\setlist{nolistsep}
-\begin{itemize}[noitemsep]
-\item We describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. The methodology crucially uses the Supermask idea for finding the pruning treshold.
-\item We show that the methodology applied on MNIST outperforms hyperoptimization of the network layer sizes: Our method can yield a significantly smaller size while retaining the same accuracy and training speed.
-\item As part of this, we reproduce the main results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask} on MNIST: Supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks.
-\end{itemize}
+In this paper, we provide multiple contributions to the new theory of Lottery Ticket pruning: We describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. The methodology crucially uses the Supermask idea for finding the pruning treshold. We further show that the methodology applied on MNIST outperforms hyperoptimization of the network layer sizes: Our method can yield a significantly smaller size while retaining the same accuracy and training speed. And as part of this, we reproduce the main results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask} on MNIST: Supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks.
 
 % todo: advantage of lottery ticket pruning to other methods, see lottery ticket paper: "Contributions"
 
@@ -296,7 +294,7 @@ This is especially useful since both the computation of the masked networks and 
 
 \subsection{Summary of steps}
 The complete recipe for applying Lottery Ticket pruning looks like this:
-\begin{enumerate}
+\begin{enumerate}[noitemsep]
 \item Take a fully connected multilayer perceptron, initialize it with random values and save these initial values.
 \item Train the network to satisfaction.
 \item For many different tresholds $t$, compute the parameters for a masked network $M_t$ using the formula
@@ -328,7 +326,7 @@ In order to apply the pruning techniques and supermasks, we need a baseline neur
 
 Since we need a meaningful trained baseline that does not overfit, we use the same early stopping criterion as in \cite{supermask}. After saving the initial, random parameters, the neural network is first trained for $20.000$ iterations, using the Adam optimizer \cite{adam} with learning rate $0.0012$ (as in \cite{supermask}) and the PyTorch cross entropy loss \cite{pytorch}. Each iteration corresponds to the processing of one batch of training data; one batch contains $60$ training examples. This initial training certainly leads to overfitting, which can be seen by plotting the validation loss (Figure \ref{fig:initial-training}).
 
-\begin{figure}[h]
+\begin{figure}[h!]
   \centering
   \textbf{Validation loss during initial training without early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/initial_trainings.pdf}
@@ -338,8 +336,11 @@ Since we need a meaningful trained baseline that does not overfit, we use the sa
 
 Because of this, we record at which iteration the minimal validation loss was achieved, and retrain the network from scratch -- starting from the saved, initial parameters -- for that many iterations. For all random seeds, the minimal validation loss is always achieved around iteration $5000$. While the training will never go exactly the same the second time around due to randomness, this seems to work well in practice both in our experiments and in \cite{supermask}, yielding a trained, non-overfit baseline network. The validation loss during the second training run is visualized in Figure \ref{fig:refined-training}.
 
-\begin{figure}[h]
- 
+Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training, where the $\pm$ sign denotes the standard deviation.
+
+\newpage
+
+\begin{figure}[h!]
   \centering
   \textbf{Validation loss during refined training with early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/refined_trainings.pdf}
@@ -347,7 +348,21 @@ Because of this, we record at which iteration the minimal validation loss was ac
   \label{fig:refined-training}
 \end{figure}
 
-Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training, where the $\pm$ sign denotes the standard deviation.
+\begin{figure}[h!]
+  \centering
+  \textbf{Sizes of masked networks}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/pruned_sizes.pdf}
+  \caption{The relative network sizes after pruning with different tresholds. The variance across seeds is too small to be visible. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. }
+  \label{fig:pruned-sizes}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \textbf{Validation accuracies of untrained masked networks}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/pruned_accuracies.pdf}
+  \caption{The validation accuracies obtained when evaluating the untrained, masked networks for different tresholds, aggregated across all ten seeds. The indicated intervals show the standard deviation. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. Even though the masked networks were never trained explicitly, they reach an accuracy that is significantly better than chance.}
+  \label{fig:pruned-accuracies}
+\end{figure}
 
 \subsection{Supermasks}
 
@@ -361,55 +376,65 @@ $$
 
 The exact size reduction achieved by choosing a particular threshold depends on the initialization, but the variance is low accross seeds: $t=0$ results in a relative size of $64.6\% \pm 0.4$, while $t=0.2$ results in $4.1\% \pm 0.6$. The size for different tresholds is visualized in Figure \ref{fig:pruned-sizes}.
 
-\begin{figure}[h]
-  \centering
-  \textbf{Sizes of masked networks}\par\medskip
-  \includegraphics[width=0.75\textwidth]{plots/pruned_sizes.pdf}
-  \caption{The relative network sizes after pruning with different tresholds. The variance across seeds is too small to be visible. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. }
-  \label{fig:pruned-sizes}
-\end{figure}
-
 With step four, we now choose the treshold which resulted in the highest validation accuracy, before any further training is done. Here, the variance is very high across seeds. The ideal treshold is found to be at $0.049 \pm 0.049$, resulting in a relative network size of $38.7\% \pm 17.9$. The resulting accuracy of these masked and otherwise untrained networks is $42.6\% \pm 15.2$, where the smallest value observed is $19.1\%$ and the largest is $70.0\%$. This astonishing fact marks our first reproduced result: As claimed in \cite{supermask}, the strategy of masking the initial, random values does indeed lead to a high accuracy, even though there is no explicit training of the masked networks involved. This is shown in Figure \ref{fig:pruned-accuracies}, where the accuracies obtained by pruning with different tresholds are visualized across seeds.
 
 \begin{figure}[h]
   \centering
-  \textbf{Validation accuracies of untrained masked networks}\par\medskip
-  \includegraphics[width=0.75\textwidth]{plots/pruned_accuracies.pdf}
-  \caption{The validation accuracies obtained when evaluating the untrained, masked networks for different tresholds, aggregated across all ten seeds. The indicated intervals show the standard deviation. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. Even though the masked networks were never trained explicitly, they reach an accuracy that is significantly better than chance.}
-  \label{fig:pruned-accuracies}
+  \textbf{Validation loss of lottery tickets and hyperoptimizations}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/lt-loss.pdf}
+  \caption{The validation loss during training of Lottery Tickets and hyperoptimized networks, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. The hyperoptimized networks were visually grouped into three categories based on their training performance. It is apparent that the performance of the Lottery Tickets is at least as good as all other hyperoptimizations.}
+  \label{fig:lt-loss}
 \end{figure}
-
-\subsection{Lottery tickets and hyperoptimization}
-After having chosen a treshold using the Supermask evaluation, it is now time to train the corresponding masked network and thus create the "Lottery Ticket". This corresponds to steps 5 and 6 of our methodology. In order to have a good comparison for the newly created network's performance, we also use a simple hyperoptimization approach, which tries out smaller values for the baseline network's layer sizes.
-
-To create the lottery ticket, we take the best-performing masked network from the previous step and train it for 5000 iterations. We also consider ten different layer size configurations, and train those for 5000 iterations, starting from random initializations. The validation loss for all these training runs is visualized in Figure \ref{fig:lt-accuracy} accross all seeds. We have grouped the different hyperoptimization into three groups by visually gauging their performance according to the graph. The graph shows that the lottery ticket trains at least as quickly and effectively as all the hyperoptimization approaches. After 5000 iterations, the lottery ticket achieves a validation loss of $0.091 \pm 0.007$ while the original baseline network architecture (without any layer size reduction) achieves $0.109 \pm 0.019$. The "High performer" group of hyperoptimizations as a whole achieves a final validation loss of $0.106 \pm 0.016$.
 
 \begin{figure}[h]
   \centering
-  \textbf{Validation loss of lottery ticket and hyperoptimization}\par\medskip
-  \includegraphics[width=0.75\textwidth]{plots/lt-accuracy.pdf}
-  \caption{}
-  \label{fig:lt-accuracy}
-\end{figure}
-
-At the same time, the Lottery Tickets network that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. As described in the previous section, the optimal Supermasks, and therefore also the Lottery Tickets, have a relative network size of $38.7\% \pm 17.9$. Thus, our method produces networks that are comparable in size to the low-performing hyperoptimizations, while they tend to outperform even the high-performing hyperoptimizations.
-
-\begin{figure}[h]
-  \centering
-  \textbf{Relative network sizes of lottery ticket and hyperoptimization}\par\medskip
+  \textbf{Relative network sizes of lottery tickets and hyperoptimizations}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/lt-size.pdf}
-  \caption{}
+  \caption{The relative network sizes of the Lottery Tickets and the three groups of hyperoptimizations. The indicated intervals show the standard deviation. We can see that the Lottery Tickets are generally as small as the lowest performing hyperoptimizations.}
   \label{fig:lt-size}
 \end{figure}
 
+\subsection{Lottery tickets and hyperoptimization}
+After having chosen a treshold using the Supermask evaluation, it is now time to train the corresponding masked network and thus create the "Lottery Ticket". This corresponds to steps 5 and 6 of our methodology. In order to have a good comparison for the newly created network's performance, we also use a simple hyperoptimization approach, which tries out smaller values for the baseline network's layer sizes. While the baseline uses sizes of $200$ and $30$ neurons for the first and second layers respectively, the hyperoptimization additionally considers all possible combinations of $(50, 100, 150)$ for the first layer and $(5, 15, 25)$ for the second layer. We are thus comparing the Lottery Ticket network to $1 + 3 \cdot 3 = 10$ other architectures.
+
+To create the lottery ticket, we take the best-performing masked network from the previous step and train it for $5000$ iterations. We also train the ten different layer size configurations for $5000$ iterations, starting from random initializations. The validation loss for all these training runs is visualized in Figure \ref{fig:lt-loss} accross all seeds. We have grouped the different hyperoptimization into three groups by visually gauging their performance according to the graph. The graph shows that the lottery ticket trains at least as quickly and effectively as all the hyperoptimization approaches. After 5000 iterations, the lottery ticket achieves a validation loss of $0.091 \pm 0.007$ while the original baseline network architecture (without any layer size reduction) achieves $0.109 \pm 0.019$. The "High performer" group of hyperoptimizations as a whole achieves a final validation loss of $0.106 \pm 0.016$.
+
+At the same time, the Lottery Ticket networks that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. As described in the previous section, the optimal Supermasks, and therefore also the Lottery Tickets, have a relative network size of $38.7\% \pm 17.9$. Thus, our method produces networks that are comparable in size to the low-performing hyperoptimizations, while they tend to outperform even the high-performing hyperoptimizations. The detailed data for the validation losses and sizes of all the different architectures can be found in Table \ref{tab:lt-data}.
+
+\begin{table}[p]
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llllll}
+\toprule
+\thead[l]{Label} & \thead[l]{Category} &     \thead[l]{Relative size}  & \thead[l]{Final validation loss} & \thead[l]{Minimal validation loss} & \thead[l]{Iteration of minimal \\ validation loss}\\
+\midrule
+ Lottery ticket &  Lottery ticket &  $38.7\% \pm 17.9$ & $0.091 \pm 0.007$ &       $0.078 \pm 0.004$ &                   $4340.0 \pm 222.1$ \\
+ Hyperop (200, 30) [baseline] &  High performer &  $100.0\%$  &     $0.109 \pm 0.019$ &       $0.078 \pm 0.001$ &                   $4360.0 \pm 171.3$\\
+ Hyperop (100, 15) &  High performer &   $49.1\%$ &     $0.112 \pm 0.015$ &       $0.095 \pm 0.005$ &                   $4600.0 \pm 326.6$ \\
+ Hyperop  (100, 25) &  High performer &   $49.8\%$  &     $0.104 \pm 0.008$ &       $0.090 \pm 0.003$ &                   $4540.0 \pm 340.6$\\
+ Hyperop  (150, 15) &  High performer &   $73.6\%$ &     $0.106 \pm 0.021$ &       $0.085 \pm 0.003$ &                   $4660.0 \pm 275.7$ \\
+ Hyperop  (150, 25) &  High performer &   $74.6\%$ &   $0.100 \pm 0.012$ &       $0.082 \pm 0.003$ &                   $4330.0 \pm 249.7$ \\
+ Hyperop (50, 15) &  Medium performer &   $24.6\%$ &    $0.130 \pm 0.010$ &       $0.119 \pm 0.006$ &                   $4700.0 \pm 326.6$ \\
+ Hyperop (50, 25) &  Medium performer &   $25.0\%$ &    $0.124 \pm 0.012$ &       $0.113 \pm 0.004$ &                    $4870.0 \pm 94.9$ \\
+ Hyperop (150, 5) &  Medium performer &   $72.6\%$ &    $0.138 \pm 0.017$ &       $0.122 \pm 0.010$ &                   $4640.0 \pm 231.9$ \\
+ Hyperop (100, 5) &  Low performer &   $48.4\%$ &    $0.161 \pm 0.019$ &       $0.146 \pm 0.014$ &                    $4870.0 \pm 94.9$ \\
+ Hyperop (50, 5) &  Low performer &   $24.2\%$  &    $0.181 \pm 0.023$ &       $0.170 \pm 0.020$ &                   $4770.0 \pm 258.4$\\
+\bottomrule
+\end{tabular}
+}
+\caption{Comparison of performance and size between the Lottery Tickets and the hyperoptimized networks. ``Hyperop $(a, b)$'' indicates a network architecture with first layer size $a$ and second layer size $b$. All networks were trained for $5000$ iterations. The data indicates that the Lottery Tickets reach a better performance while having a smaller sizes than the hyperoptimized networks. }
+\label{tab:lt-data}
+\end{table}
+
 \section{Conclusion}
 
+Todo.
 % todo: reproduction, but effect observed is not as strong
 
+\newpage
 %\fancyhead[LE]{\it \leftmark}
 %\chapter{}
 %\fancyhead[LE,RO]{\it Bibliography}       % A bibliography never have a letter or numbering!
-    \addcontentsline{toc}{section}{Bibliography}% Add to the TOC
+    \addcontentsline{toc}{section}{References}% Add to the TOC
     \printbibliography
 %\cleardoublepage
 
