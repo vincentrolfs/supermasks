@@ -285,9 +285,10 @@ $$
 \operatorname{sign}\left(w_{\text initial}\right) \cdot w_{\text trained}
 $$
 is minimal. In other words, we keep those values which both have a large magnitude after training and retain their sign, and set the other parameters to zero. Following the example above, if the initial parameters are $0.1, 0.2, 0.3$ and the parameters after training are $-0.2, 0.05, 0.3$, then pruning with a treshold $t=0.1$ yields $0, 0, 0.3$ -- in this case, the first value is pruned as well, because it changed signs.
+In any case, it is necessary to choose a good treshold to apply the method effectively.
 
 \subsection{Choosing the treshold}
-In \cite{supermask}, the authors provide a second, and most crucial, insight, which will help us choose a good pruning treshold. When choosing the parameters as outlined above, the result is just a version of the initial, random parameters with some set to zero. However, without further training, the resulting networks nonetheless already show a suprisingly good performance when evaluated. This is where the term Supermask comes from: We take the initial, random parameters and multiply them with a mask of zeros and ones, and suddenly we get suprisingly great performance. For example, in \cite{supermask}, the authors report an accuracy of $86\%$ on MNIST.
+We will describe a way of choosing a good pruning treshold based on another crucial insight from \cite{supermask}. It is based on the following observation: When choosing the parameters as outlined above, the result is just a version of the initial, random parameters with some set to zero. However, without further training, the resulting networks nonetheless already show a suprisingly good performance when evaluated. This is where the term Supermask comes from: We take the initial, random parameters and multiply them with a mask of zeros and ones, and suddenly we get suprisingly great performance. For example, in \cite{supermask}, the authors report an accuracy of $86\%$ on MNIST.
 
 This leads us to a straightforward way of choosing a treshold: We simply compute the masked networks for different tresholds, and then (without training!) check their performance on the validation set. We then choose the treshold that yielded the highest performance. More to the point, we choose the masked network corresponding to that treshold, and train it to yield our pruned network.
 
@@ -329,7 +330,7 @@ Since we need a meaningful trained baseline that does not overfit, we use the sa
 
 \begin{figure}[h]
   \centering
-  \textbf{Validation accuracy during initial training without early stopping}\par\medskip
+  \textbf{Validation loss during initial training without early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/initial_trainings.pdf}
   \caption{The validation loss during the initial training run, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. Overfitting is clearly apparent: After about iteration $5000$, the validation starts increasing again.}
   \label{fig:initial-training}
@@ -340,13 +341,13 @@ Because of this, we record at which iteration the minimal validation loss was ac
 \begin{figure}[h]
  
   \centering
-  \textbf{Validation accuracy during refined training with early stopping}\par\medskip
+  \textbf{Validation loss during refined training with early stopping}\par\medskip
   \includegraphics[width=0.75\textwidth]{plots/refined_trainings.pdf}
   \caption{The validation loss during the second training run with early stopping, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. For each seed, the training was stopped at the iteration that achieved the minimal validation loss during the initial training run. We can see that this approach results in a non-overfit, small validation loss when the training finishes.}
   \label{fig:refined-training}
 \end{figure}
 
-Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training.
+Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before training and $0.977 \pm 0.001$ after training, where the $\pm$ sign denotes the standard deviation.
 
 \subsection{Supermasks}
 
@@ -368,7 +369,7 @@ The exact size reduction achieved by choosing a particular threshold depends on 
   \label{fig:pruned-sizes}
 \end{figure}
 
-With step four, we now choose the treshold which resulted in the highest validation accuracy, before any further training is done. Here, the variance is very high across seeds. The ideal treshold is found to be at $0.049 \pm 0.049$, resulting in a relative network size of $38.7\% \pm 17.9$. The resulting accuracy of these masked and otherwise untrained networks is $42.6\% \pm 15.2$, where the smallest value observed is $19.1\%$ and the largest is $70.0\%$. This astonishing fact marks our first reproduced result: As claimed in \cite{supermask}, the strategy of masking the initial, random values does indeed lead to a high accuracy, even though there is not explicit training of the masked networks involved. This is shown in \ref{fig:pruned-accuracies}, where the accuracies obtained by pruning with different tresholds are visualized across seeds.
+With step four, we now choose the treshold which resulted in the highest validation accuracy, before any further training is done. Here, the variance is very high across seeds. The ideal treshold is found to be at $0.049 \pm 0.049$, resulting in a relative network size of $38.7\% \pm 17.9$. The resulting accuracy of these masked and otherwise untrained networks is $42.6\% \pm 15.2$, where the smallest value observed is $19.1\%$ and the largest is $70.0\%$. This astonishing fact marks our first reproduced result: As claimed in \cite{supermask}, the strategy of masking the initial, random values does indeed lead to a high accuracy, even though there is no explicit training of the masked networks involved. This is shown in Figure \ref{fig:pruned-accuracies}, where the accuracies obtained by pruning with different tresholds are visualized across seeds.
 
 \begin{figure}[h]
   \centering
@@ -376,6 +377,29 @@ With step four, we now choose the treshold which resulted in the highest validat
   \includegraphics[width=0.75\textwidth]{plots/pruned_accuracies.pdf}
   \caption{The validation accuracies obtained when evaluating the untrained, masked networks for different tresholds, aggregated across all ten seeds. The indicated intervals show the standard deviation. The colored area indicates the tresholds that are considered as part of the evaluation of our methodology. Even though the masked networks were never trained explicitly, they reach an accuracy that is significantly better than chance.}
   \label{fig:pruned-accuracies}
+\end{figure}
+
+\subsection{Lottery tickets and hyperoptimization}
+After having chosen a treshold using the Supermask evaluation, it is now time to train the corresponding masked network and thus create the "Lottery Ticket". This corresponds to steps 5 and 6 of our methodology. In order to have a good comparison for the newly created network's performance, we also use a simple hyperoptimization approach, which tries out smaller values for the baseline network's layer sizes.
+
+To create the lottery ticket, we take the best-performing masked network from the previous step and train it for 5000 iterations. We also consider ten different layer size configurations, and train those for 5000 iterations, starting from random initializations. The validation loss for all these training runs is visualized in Figure \ref{fig:lt-accuracy} accross all seeds. We have grouped the different hyperoptimization into three groups by visually gauging their performance according to the graph. The graph shows that the lottery ticket trains at least as quickly and effectively as all the hyperoptimization approaches. After 5000 iterations, the lottery ticket achieves a validation loss of $0.091 \pm 0.007$ while the original baseline network architecture (without any layer size reduction) achieves $0.109 \pm 0.019$. The "High performer" group of hyperoptimizations as a whole achieves a final validation loss of $0.106 \pm 0.016$.
+
+\begin{figure}[h]
+  \centering
+  \textbf{Validation loss of lottery ticket and hyperoptimization}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/lt-accuracy.pdf}
+  \caption{}
+  \label{fig:lt-accuracy}
+\end{figure}
+
+At the same time, the Lottery Tickets network that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. 
+
+\begin{figure}[h]
+  \centering
+  \textbf{Relative network sizes of lottery ticket and hyperoptimization}\par\medskip
+  \includegraphics[width=0.75\textwidth]{plots/lt-size.pdf}
+  \caption{}
+  \label{fig:lt-size}
 \end{figure}
 
 %The next step of our methodology is the application of the supermasks. To that end, we apply the following procedure taken from \cite{supermask}. First, we reset the baseline network to its initial parameters, which were randomly initialized, but saved before the training started. Next, we choose a treshold $t$ and iterate through the parameters $w_1, \ldots, w_n$ of the network. We set a new value for each parameter according to the formula
@@ -391,13 +415,13 @@ With step four, we now choose the treshold which resulted in the highest validat
 %
 %We then evaluate the accuracy of this masked network on the validation set. Of course, the performance depends on the threshold: For very large thresholds, all parameters are set to zero, so the accuracy will be close to $0.1$. For very small (negative) thresholds, all parameters are kept at their initial value, which was randomly chosen at the beginning, so we still expect an accuracy close to $0.1$. For intermediate tresholds, something remarkable happens: The masked network achieves a validation accuracy that is significantly better than $0.1$, even though all the parameter values come from a random distribution, and the only training information lies in the decision which parameters to set to zero. The performance for different tresholds of the masked networks across all ten random seeds are shown in XXX.
 
-\subsection{Lottery tickets}
-
-The next step is to apply the knowledge we have about the performance of the masked networks. We wish to find a "Lottery Ticket" -- this is essentially a masked network which has been trained, where the parameters that are zero are frozen during training. When trying to prune a network using lottery tickets, one is faced with the one question that always arises during pruning: How small should the resulting network be? Here, we use the validation results of the supermasks as a guideline: Out of all the masked networks resulting from different tresholds, we choose the masked network that has the highest validation accuracy before training. We then train this masked network for $5000$ iterations and observe the validation loss.
-
-\subsection{Hyperoptimization}
-
-In order to have a comparization for the quality of the pruning produced by the lottery ticket approach, we employ a simple hyperoptimization scheme to optimize the network size. Whereas the initial sizes for layers $1$ and $2$ were $200$ and $30$ respectively, for the hyperoptimization we allow all combinations of $50, 100, 150$ and $5, 15, 25$ respectively. For each of these size combinations, we take a randomly initialized network of that size, and train it for $5000$ ietrations, observing the validation loss.
+%\subsection{Lottery tickets}
+%
+%The next step is to apply the knowledge we have about the performance of the masked networks. We wish to find a "Lottery Ticket" -- this is essentially a masked network which has been trained, where the parameters that are zero are frozen during training. When trying to prune a network using lottery tickets, one is faced with the one question that always arises during pruning: How small should the resulting network be? Here, we use the validation results of the supermasks as a guideline: Out of all the masked networks resulting from different tresholds, we choose the masked network that has the highest validation accuracy before training. We then train this masked network for $5000$ iterations and observe the validation loss.
+%
+%\subsection{Hyperoptimization}
+%
+%In order to have a comparization for the quality of the pruning produced by the lottery ticket approach, we employ a simple hyperoptimization scheme to optimize the network size. Whereas the initial sizes for layers $1$ and $2$ were $200$ and $30$ respectively, for the hyperoptimization we allow all combinations of $50, 100, 150$ and $5, 15, 25$ respectively. For each of these size combinations, we take a randomly initialized network of that size, and train it for $5000$ iterations, observing the validation loss.
 
 \section{Conclusion}
 
