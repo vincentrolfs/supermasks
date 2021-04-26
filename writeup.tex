@@ -38,6 +38,7 @@
 \usepackage[backend=biber,bibencoding=utf8]{biblatex}
 \addbibresource{bibliography.bib} 
 
+\usepackage{float}
 \usepackage{amsfonts}                   % AMS Math Packet (Fonts)
 \usepackage{amsmath}                    % AMS Math Packet
 \usepackage{amssymb}                    % Additional mathematical symbols
@@ -50,8 +51,6 @@
 \usepackage[body={5.8in,9in}]{geometry} % Type area (size, margins...)
 \usepackage{booktabs, makecell} % tables
 \renewcommand\theadfont{\bfseries}
-
-\usepackage{float}
 
 %\geometry{a4paper,outer=3.35cm}        % !!!Release version (Normal margins)
 %\geometry{a4paper,outer=2.5cm}         % !!!Print version (Additional margin on the left for the binding)
@@ -326,9 +325,9 @@ In order to apply the pruning techniques and supermasks, we need a baseline neur
 
 Since we need a meaningful trained baseline that does not overfit, we use the same early stopping criterion as in \cite{supermask}. After saving the initial, random parameters, the neural network is first trained for $20.000$ iterations, using the Adam optimizer \cite{adam} with learning rate $0.0012$ (as in \cite{supermask}) and the PyTorch cross entropy loss \cite{pytorch}. Each iteration corresponds to the processing of one batch of training data; one batch contains $60$ training examples. This initial training certainly leads to overfitting, which can be seen by plotting the validation loss (Figure \ref{fig:initial-training}).
 
-\begin{figure}[h!]
+\begin{figure}[t!]
   \centering
-  \textbf{Validation loss during initial training without early stopping}\par\medskip
+  \textbf{Validation loss during initial training without early stopping}
   \includegraphics[width=0.75\textwidth]{plots/initial_trainings.pdf}
   \caption{The validation loss during the initial training run, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. Overfitting is clearly apparent: After about iteration $5000$, the validation starts increasing again.}
   \label{fig:initial-training}
@@ -340,25 +339,25 @@ Across random seeds, the validation accuracy is $0.101 \pm 0.016$ before trainin
 
 \newpage
 
-\begin{figure}[h!]
+\begin{figure}[H]
   \centering
-  \textbf{Validation loss during refined training with early stopping}\par\medskip
+  \textbf{Validation loss during refined training with early stopping}
   \includegraphics[width=0.75\textwidth]{plots/refined_trainings.pdf}
   \caption{The validation loss during the second training run with early stopping, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. For each seed, the training was stopped at the iteration that achieved the minimal validation loss during the initial training run. We can see that this approach results in a non-overfit, small validation loss when the training finishes.}
   \label{fig:refined-training}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
   \centering
-  \textbf{Sizes of masked networks}\par\medskip
+  \textbf{Sizes of masked networks}
   \includegraphics[width=0.75\textwidth]{plots/pruned_sizes.pdf}
   \caption{The relative network sizes after pruning with different thresholds. The variance across seeds is too small to be visible. The colored area indicates the thresholds that are considered as part of the evaluation of our methodology. The other parts of the graph are shown to visualize the convergence behaviour. }
   \label{fig:pruned-sizes}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
   \centering
-  \textbf{Validation accuracies of untrained masked networks}\par\medskip
+  \textbf{Validation accuracies of untrained masked networks}
   \includegraphics[width=0.75\textwidth]{plots/pruned_accuracies.pdf}
   \caption{The validation accuracies obtained when evaluating the untrained, masked networks for different thresholds, aggregated across all ten seeds. The indicated intervals show the standard deviation. Even though the masked networks were never trained explicitly, they reach an accuracy that is significantly better than chance. The colored area indicates the thresholds that are considered as part of the evaluation of our methodology -- the rest of the graph serves to illustrate that the accuracy indeed converges to $0.1$ for very small or large thresholds, as predicted by the theory.}
   \label{fig:pruned-accuracies}
@@ -380,15 +379,15 @@ With step four, we now choose the threshold which resulted in the highest valida
 
 \begin{figure}[t]
   \centering
-  \textbf{Validation loss of lottery tickets and hyperoptimizations}\par\medskip
+  \textbf{Validation loss of lottery tickets and hyperoptimizations}
   \includegraphics[width=0.75\textwidth]{plots/lt-loss.pdf}
   \caption{The validation loss during training of Lottery Tickets and hyperoptimized networks, evaluated every $100$ iterations across all ten random seeds. The indicated intervals show the standard deviation. The hyperoptimized networks were visually grouped into three categories based on their training performance. It is apparent that the performance of the Lottery Tickets is at least as good as all other hyperoptimizations.}
   \label{fig:lt-loss}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[t]
   \centering
-  \textbf{Relative network sizes of lottery tickets and hyperoptimizations}\par\medskip
+  \textbf{Relative network sizes of lottery tickets and hyperoptimizations}
   \includegraphics[width=0.75\textwidth]{plots/lt-size.pdf}
   \caption{The relative network sizes of the Lottery Tickets and the three groups of hyperoptimizations. The indicated intervals show the standard deviation. We can see that the sizes of Lottery Tickets are similar to the low and medium performers, indicating that the method prunes rather aggressively while achieving a good performance as shown in Figure \ref{fig:lt-loss}.}
   \label{fig:lt-size}
