@@ -426,10 +426,18 @@ At the same time, the Lottery Ticket networks that were found by our method are 
 
 \section{Conclusion}
 
-Todo.
-% todo: reproduction, but effect observed is not as strong
+In this paper we presented a complete methodology for applying Lottery Ticket pruning to neural network training. Our experimental results indicate that this technique outperforms hyperoptimization grid search by yielding smaller networks with higher validation accuracy. However, further research is needed to make sure that these improvements are statistically significant. In addition, experiments on larger datasets and comparisons with other pruning methods would further improve our understanding of the merits of Lottery Ticket based pruning.
 
-\newpage
+As part of our evaluations, we were able to reproduce results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask}. In \cite{lottery}, the authors establish the Lottery Ticket approach and compare it to an unpruned network. This comparison has also been done by us and can be seen in Figure \ref{fig:lt-loss}: The unpruned baseline network is the best-performing network from the high performer category. Similarly to \cite{lottery}, we can see that the Lottery Ticket approach outperforms this baseline, though we note that in our paper as well as in \cite{lottery}, the results do not seem to be statistically significant.
+
+In \cite{supermask}, the authors introduce the concept of Supermasks, and show a graph that illustrates they were able to achieve an untrained test accuracy of around $80\%$ using Supermasks, across $5$ independent runs with small error bars (Figure $7$, top left graph, orange line in \cite{supermask}). In our work, Figure \ref{fig:pruned-accuracies} shows results from applying the same method. While we were able to achieve an accuracy that is significantly better than chance at approximately $35 \%$, it is clear that the average accuracy achieved is much lower and comes with larger error bars compared to \cite{supermask}. Moreover, the largest accuracy we observed accross ten seeds and all thresholds is $70.0\%$. Further research is needed to investigate how performant Supermasks can be.
+
+% todo: e-mail feedback einarbeiten
+
+% todo: reproduction successful, but effect observed is not as strong
+
+%In this paper, we provide multiple contributions to the new theory of Lottery Ticket pruning: We describe a complete methodology for applying Lottery Ticket pruning to a trained neural network. The methodology crucially uses the Supermask idea for finding the pruning threshold. We further show that the methodology applied on MNIST outperforms hyperoptimization of the network layer sizes: Our method can yield a significantly smaller size while retaining the same accuracy and training speed. And as part of this, we reproduce the main results regarding Lottery Tickets \cite{lottery} and Supermasks \cite{supermask} on MNIST: Supermasks do indeed yield untrained networks with higher-than-random accuracy, which can be trained to achieve faster training and higher accuracy with less parameters, compared to the unpruned networks.
+
 %\fancyhead[LE]{\it \leftmark}
 %\chapter{}
 \fancyhead[LE,RO]{\it References}       % A bibliography never have a letter or numbering!
