@@ -398,7 +398,19 @@ After having chosen a threshold using the Supermask evaluation, it is now time t
 
 To create the lottery ticket, we take the best-performing masked network from the previous step and train it for $5000$ iterations. We also train the ten different layer size configurations for $5000$ iterations, starting from random initializations. The validation loss for all these training runs is visualized in Figure \ref{fig:lt-loss} accross all seeds. We have grouped the different hyperoptimization into three groups by visually gauging their performance according to the graph. The graph shows that the lottery ticket trains at least as quickly and effectively as all the hyperoptimization approaches. After 5000 iterations, the lottery ticket achieves a validation loss of $0.091 \pm 0.007$ while the original baseline network architecture (without any layer size reduction) achieves $0.109 \pm 0.019$. The "High performer" group of hyperoptimizations as a whole achieves a final validation loss of $0.106 \pm 0.016$.
 
-At the same time, the Lottery Ticket networks that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. As described in the previous section, the optimal Supermasks, and therefore also the Lottery Tickets, have a relative network size of $38.7\% \pm 17.9$. Thus, our method produces networks that are comparable in size to the low-performing hyperoptimizations, while they tend to outperform even the high-performing hyperoptimizations. The detailed data for the validation losses and sizes of all the different architectures can be found in Table \ref{tab:lt-data}.
+At the same time, the Lottery Ticket networks that were found by our method are generally smaller (pruned more aggressively) than the results from the hyperoptimization. This can be seen in Figure \ref{fig:lt-size}, which shows the relative network sizes of all the resulting networks. As described in the previous section, the optimal Supermasks, and therefore also the Lottery Tickets, have a relative network size of $38.7\% \pm 17.9$.
+
+Thus, our method produces networks that are comparable in size to the low-performing hyperoptimizations, while they tend to outperform even the high-performing hyperoptimizations. This is further visualized in Figure \ref{fig:lt-scatter}, where the minimum validation loss attained throughout the training is compared to the sizes of the tested network. The graph shows that the Lottery Tickets tend to achieve a better performance while simultaneously being smaller in size compared to the hyperoptimizations.
+
+The detailed data for the validation losses and sizes of all the different architectures can be found in Table \ref{tab:lt-data}.
+
+\begin{figure}[t]
+  \centering
+  \textbf{Sizes and minimal loss of lottery tickets and hyperoptimizations}
+  \includegraphics[width=0.75\textwidth]{plots/lt-scatter.pdf}
+  \caption{The relative network size and minimum validation loss of the Lottery Tickets and the three groups of hyperoptimizations. We show the smallest validation loss that was observed during the training of $5000$ iterations. All $10$ seeds are visualized. It is apparent that the Lottery Tickets tend to outperform the hyperoptimizations both regarding size and regarding validation performance.}
+  \label{fig:lt-scatter}
+\end{figure}
 
 \begin{table}[p]
 \resizebox{\textwidth}{!}{
